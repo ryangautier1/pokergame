@@ -302,7 +302,6 @@ const checkHand = (hand, board) => {
 
   // check for straight-flush
   if (flush) {
-
     if (flush[0] - flush[1] === 1 &&
       flush[1] - flush[2] === 1 &&
       flush[2] - flush[3] === 1 &&
@@ -312,22 +311,36 @@ const checkHand = (hand, board) => {
   }
 
   // check for straight
-  // cardSet[4].number, cardSet[3].number, and cardSet[2].number must be consecutive in the 
-  // sorted cardSet for a straight to exist, besides edge case of A-4 straight
-  if (cardSet[4].number - cardSet[3].number === 1 && cardSet[3].number - cardSet[2].number === 1) {
-    if (cardSet[5].number - cardSet[4].number === 1 && cardSet[6].number - cardSet[5].number === 1) {
-      straight = cardSet[6].number;
-    }
-    else if (cardSet[2].number - cardSet[1].number === 1 && cardSet[1].number - cardSet[0].number === 1) {
-      straight = cardSet[4].number;
+  let removedDuplicates = [];
+  for (let i=0; i<cardSet.length; i++) {
+    if (!removedDuplicates.includes(cardSet[i].number)) {
+      removedDuplicates.push(cardSet[i].number);
     }
   }
-  // edge case of A-4 straight
-  else if (cardSet[1].number - cardSet[0].number === 1
-    && cardSet[2].number - cardSet[1].number === 1
-    && cardSet[3].number - cardSet[2].number === 1
-    && cardSet[6].number === 14) {
-    straight = cardSet[3].number;
+  console.log(removedDuplicates);
+  // there can only be a straight if there are at least 5 unique cards
+  if (removedDuplicates.length >= 5) {
+    // edge case of A-5 straight
+    if (removedDuplicates.includes(14) && 
+    removedDuplicates.includes(2) &&
+    removedDuplicates.includes(3) &&
+    removedDuplicates.includes(4) &&
+    removedDuplicates.includes(5)) {
+      straight = [5,4,3,2,1];
+    }
+
+    let consequtiveCount = 1;
+    for (let i=1; i<removedDuplicates.length; i++) {
+      if (removedDuplicates[i] - removedDuplicates[i-1] === 1) {
+        consequtiveCount++;
+        if (consequtiveCount >= 5) {
+          straight = [removedDuplicates[i], removedDuplicates[i-1], removedDuplicates[i-2], removedDuplicates[i-3], removedDuplicates[i-4]];
+        }
+      }
+      else {
+        consequtiveCount = 0;
+      }
+    } 
   }
 
   if (flush) {
@@ -364,8 +377,11 @@ const checkHand = (hand, board) => {
 
 let hands = makeHands(12, availableCards);
 console.log(hands);
-let board = getBoard(availableCards);
+// let board = getBoard(availableCards);
+let board = [{number: 14, suit: 3}, {number: 3, suit: 2}, {number: 4, suit: 1},
+{number: 5, suit: 1}, {number:2, suit: 1}];
 console.log(board);
+
 for (let i = 0; i < hands.length; i++) {
   (console.log(checkHand(hands[i].hand, board), hands[i].hand));
 }
