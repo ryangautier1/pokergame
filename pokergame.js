@@ -241,7 +241,7 @@ const getBoard = (availableCards) => {
   for (let j = 0; j < 5; j++) {
     // get random number from availableCards array
     let currentCardIndex = Math.floor(Math.random() * availableCards.length);
-    board.push(cards[currentCardIndex]);
+    board.push(cards[availableCards[currentCardIndex]]);
     availableCards.splice(currentCardIndex, 1)[0];
   }
   return board;
@@ -253,8 +253,16 @@ const checkHand = (hand, board) => {
   let cardSet = hand.concat(board);
   cardSet.sort((a, b) => { return a.number - b.number });
 
+  let straightflush = false;
+  let fourOfAKind = false;
+  let fullHouse = false;
   let flush = false;
   let straight = false;
+  let threeOfAKind = false;
+  let pair = false;
+  let highCard = false
+
+  let cardCounts;
 
   // check suits for flush
   let suitZeroFlush = cardSet.filter(card => card.suit === 0);
@@ -266,30 +274,41 @@ const checkHand = (hand, board) => {
   if (suitZeroFlush.length >= 5) {
     let flushArr = [];
     for (let i = suitZeroFlush.length - 1; i > suitZeroFlush.length - 6; i--) {
-      flushArr.push(suitZeroFlush[i]);
+      flushArr.push(suitZeroFlush[i].number);
     }
     flush = flushArr;
   }
   else if (suitOneFlush.length >= 5) {
     let flushArr = [];
     for (let i = suitOneFlush.length - 1; i > suitOneFlush.length - 6; i--) {
-      flushArr.push(suitOneFlush[i]);
+      flushArr.push(suitOneFlush[i].number);
     }
     flush = flushArr;
   }
   else if (suitTwoFlush.length >= 5) {
     let flushArr = [];
     for (let i = suitTwoFlush.length - 1; i > suitTwoFlush.length - 6; i--) {
-      flushArr.push(suitTwoFlush[i]);
+      flushArr.push(suitTwoFlush[i].number);
     }
     flush = flushArr;
   }
   else if (suitThreeFlush.length >= 5) {
     let flushArr = [];
     for (let i = suitThreeFlush.length - 1; i > suitThreeFlush.length - 6; i--) {
-      flushArr.push(suitThreeFlush[i]);
+      flushArr.push(suitThreeFlush[i].number);
     }
     flush = flushArr;
+  }
+
+  // check for straight-flush
+  if (flush) {
+
+    if (flush[0] - flush[1] === 1 &&
+      flush[1] - flush[2] === 1 &&
+      flush[2] - flush[3] === 1 &&
+      flush[3] - flush[4] === 1) {
+      return { 8: straight };
+    }
   }
 
   // check for straight
@@ -311,54 +330,33 @@ const checkHand = (hand, board) => {
     straight = cardSet[3].number;
   }
 
-  // check for straight-flush
-  if (straight && flush) {
-    return { 8: staight };
+  if (flush) {
+    return { 5: flush };
+  }
+  if (straight) {
+    return { 4: straight };
   }
 
-  // check for four of a kind
+  // check for four of a kind, full house, 3 of a kind, and pair
   // cardSet is sorted at this point
-  // will not have 4 of a kind if there is a flush or straight
-  if (!straight && !flush) {
-    if (cardSet[0].number === cardSet[1].number &&
-      cardSet[0].number === cardSet[2].number &&
-      cardSet[0].number === cardSet[3].number) {
-      return ({ 7: cardSet[0].number })
-    }
-    else if (cardSet[1].number === cardSet[2].number &&
-      cardSet[1].number === cardSet[3].number &&
-      cardSet[1].number === cardSet[4].number) {
-      return ({ 7: cardSet[1].number })
-    }
-    else if (cardSet[2].number === cardSet[3].number &&
-      cardSet[2].number === cardSet[4].number &&
-      cardSet[2].number === cardSet[5].number) {
-      return ({ 7: cardSet[2].number })
-    }
-    else if (cardSet[3].number === cardSet[4].number &&
-      cardSet[3].number === cardSet[5].number &&
-      cardSet[3].number === cardSet[6].number) {
-      return ({ 7: cardSet[3].number })
-    }
-  }
-
-  // check for full house
-  // will not be full house if there is a straight or flush
+  // will not need to check this if there is a flush or straight
   if (!straight && !flush) {
     let checkedValues = {};
-    for (let i=0; i<cardSet.length; i++) {
+    for (let i = 0; i < cardSet.length; i++) {
       // if I have not checked this value yet
       if (!checkedValues.hasOwnProperty(cardSet[i].number)) {
-        checkedValues[cardSet[i].number] =  1;
+        checkedValues[cardSet[i].number] = 1;
       }
       // if I have checked this value, increment it
       else {
         checkedValues[cardSet[i].number]++;
       }
     }
-    console.log(checkedValues);
-
+    cardCounts = Object.values(checkedValues);
   }
+
+
+
 
 
 
@@ -369,5 +367,5 @@ console.log(hands);
 let board = getBoard(availableCards);
 console.log(board);
 for (let i = 0; i < hands.length; i++) {
-  (checkHand(hands[i].hand, board));
+  (console.log(checkHand(hands[i].hand, board), hands[i].hand));
 }
