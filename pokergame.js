@@ -247,13 +247,41 @@ const getBoard = (availableCards) => {
   return board;
 }
 
+function checkForStraight(arr) {
+  // there can only be a straight if there are at least 5 unique cards
+  if (arr.length >= 5) {
+    // edge case of A-5 straight
+    if (arr.includes(14) && 
+    arr.includes(2) &&
+    arr.includes(3) &&
+    arr.includes(4) &&
+    arr.includes(5)) {
+      return [5,4,3,2,1];
+    }
+
+    let consequtiveCount = 1;
+    let straight = false;
+    for (let i=1; i<arr.length; i++) {
+      if (arr[i] - arr[i-1] === 1) {
+        consequtiveCount++;
+        if (consequtiveCount >= 5) {
+          straight = [arr[i], arr[i-1], arr[i-2], arr[i-3], arr[i-4]];
+        }
+      }
+      else {
+        consequtiveCount = 0;
+      }
+    } 
+    return straight;
+  }
+}
 
 // returns object with hand value 0-9, and array of hand that is worth that value
 const checkHand = (hand, board) => {
   let cardSet = hand.concat(board);
   cardSet.sort((a, b) => { return a.number - b.number });
 
-  let straightflush = false;
+  let straightFlush = false;
   let fourOfAKind = false;
   let fullHouse = false;
   let flush = false;
@@ -273,28 +301,28 @@ const checkHand = (hand, board) => {
   // if flush, get the 5 largest cards of that suit and store in array
   if (suitZeroFlush.length >= 5) {
     let flushArr = [];
-    for (let i = suitZeroFlush.length - 1; i > suitZeroFlush.length - 6; i--) {
+    for (let i = suitZeroFlush.length - 1; i >= 0; i--) {
       flushArr.push(suitZeroFlush[i].number);
     }
     flush = flushArr;
   }
   else if (suitOneFlush.length >= 5) {
     let flushArr = [];
-    for (let i = suitOneFlush.length - 1; i > suitOneFlush.length - 6; i--) {
+    for (let i = suitOneFlush.length - 1; i >= 0; i--) {
       flushArr.push(suitOneFlush[i].number);
     }
     flush = flushArr;
   }
   else if (suitTwoFlush.length >= 5) {
     let flushArr = [];
-    for (let i = suitTwoFlush.length - 1; i > suitTwoFlush.length - 6; i--) {
+    for (let i = suitTwoFlush.length - 1; i >= 0; i--) {
       flushArr.push(suitTwoFlush[i].number);
     }
     flush = flushArr;
   }
   else if (suitThreeFlush.length >= 5) {
     let flushArr = [];
-    for (let i = suitThreeFlush.length - 1; i > suitThreeFlush.length - 6; i--) {
+    for (let i = suitThreeFlush.length - 1; i >= 0; i--) {
       flushArr.push(suitThreeFlush[i].number);
     }
     flush = flushArr;
@@ -302,11 +330,9 @@ const checkHand = (hand, board) => {
 
   // check for straight-flush
   if (flush) {
-    if (flush[0] - flush[1] === 1 &&
-      flush[1] - flush[2] === 1 &&
-      flush[2] - flush[3] === 1 &&
-      flush[3] - flush[4] === 1) {
-      return { 8: straight };
+    straightFlush = checkForStraight(flush); 
+    if (straightFlush) {
+      return { 8: straightFlush };
     }
   }
 
@@ -317,33 +343,13 @@ const checkHand = (hand, board) => {
       removedDuplicates.push(cardSet[i].number);
     }
   }
-  console.log(removedDuplicates);
-  // there can only be a straight if there are at least 5 unique cards
-  if (removedDuplicates.length >= 5) {
-    // edge case of A-5 straight
-    if (removedDuplicates.includes(14) && 
-    removedDuplicates.includes(2) &&
-    removedDuplicates.includes(3) &&
-    removedDuplicates.includes(4) &&
-    removedDuplicates.includes(5)) {
-      straight = [5,4,3,2,1];
-    }
 
-    let consequtiveCount = 1;
-    for (let i=1; i<removedDuplicates.length; i++) {
-      if (removedDuplicates[i] - removedDuplicates[i-1] === 1) {
-        consequtiveCount++;
-        if (consequtiveCount >= 5) {
-          straight = [removedDuplicates[i], removedDuplicates[i-1], removedDuplicates[i-2], removedDuplicates[i-3], removedDuplicates[i-4]];
-        }
-      }
-      else {
-        consequtiveCount = 0;
-      }
-    } 
-  }
+  straight = checkForStraight(removedDuplicates);
 
   if (flush) {
+    if (flush.length>5) {
+      flush.pop();
+    }
     return { 5: flush };
   }
   if (straight) {
@@ -378,8 +384,8 @@ const checkHand = (hand, board) => {
 let hands = makeHands(12, availableCards);
 console.log(hands);
 // let board = getBoard(availableCards);
-let board = [{number: 14, suit: 3}, {number: 3, suit: 2}, {number: 4, suit: 1},
-{number: 5, suit: 1}, {number:2, suit: 1}];
+let board = [{number: 2, suit: 0}, {number: 3, suit: 0}, {number: 4, suit: 0},
+{number: 5, suit: 0}, {number:9, suit: 1}];
 console.log(board);
 
 for (let i = 0; i < hands.length; i++) {
