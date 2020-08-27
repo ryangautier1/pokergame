@@ -372,6 +372,18 @@ const checkHand = (hand, board) => {
       }
     }
     cardCounts = Object.values(checkedValues);
+
+    if (cardCounts.includes(4)) {
+      let cardWithFour = +Object.keys(checkedValues).find(key => checkedValues[key] === 4);
+      let kickerCards = cardSet.filter(card => card.number !== cardWithFour);
+      let kickers = [];
+      for (let i=0; i<kickerCards.length; i++) {
+        kickers.push(kickerCards[i].number);
+      }
+      kickers.sort((a,b) => (b-a));
+      return { 7: [cardWithFour, cardWithFour, cardWithFour, cardWithFour, kickers[0]]};
+    }
+
   }
 
 
@@ -384,10 +396,10 @@ const checkHand = (hand, board) => {
 let hands = makeHands(12, availableCards);
 console.log(hands);
 // let board = getBoard(availableCards);
-let board = [{number: 2, suit: 0}, {number: 3, suit: 0}, {number: 4, suit: 0},
-{number: 5, suit: 0}, {number:9, suit: 1}];
+let board = [{number: 2, suit: 0}, {number: 3, suit: 0}, {number: 3, suit: 1},
+{number: 3, suit: 2}, {number:9, suit: 1}];
 console.log(board);
 
 for (let i = 0; i < hands.length; i++) {
-  (console.log(checkHand(hands[i].hand, board), hands[i].hand));
+  (console.log(checkHand([{number: 3, suit: 3}, {number: 10, suit: 1}], board), hands[i].hand));
 }
