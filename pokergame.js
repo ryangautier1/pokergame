@@ -383,6 +383,50 @@ const checkHand = (hand, board) => {
       kickers.sort((a,b) => (b-a));
       return { 7: [cardWithFour, cardWithFour, cardWithFour, cardWithFour, kickers[0]]};
     }
+    else if (cardCounts.includes(3) && !cardCounts.includes(2)) {
+      let cardsWithThree = [];
+      Object.keys(checkedValues).forEach((key) => {
+        if (checkedValues[key] === 3){
+          cardsWithThree.push(key);
+        }});
+      let maxCardWithThree = Math.max(...cardsWithThree);
+      let kickerCards = cardSet.filter(card => card.number !== maxCardWithThree);
+      let kickers = [];
+      for (let i=0; i<kickerCards.length; i++) {
+        kickers.push(kickerCards[i].number);
+      }
+      kickers.sort((a,b) => (b-a));
+      return { 3: [maxCardWithThree, maxCardWithThree, maxCardWithThree, kickers[0], kickers[1]]};
+    }
+    else if (cardCounts.includes(2)) {
+      let cardsWithTwo = [];
+      Object.keys(checkedValues).forEach((key) => {
+        if (checkedValues[key] === 2){
+          cardsWithTwo.push(key);
+        }});
+      // console.log(cardsWithTwo, "cardsWithTwo");
+      let maxCardWithTwo = Math.max(...cardsWithTwo);
+      let secondBiggestCardWithTwo;
+      let kickerCards;
+      let kickers = [];
+      if (cardsWithTwo.length > 1) {
+        cardsWithTwo.splice(cardsWithTwo.indexOf(Math.max(...cardsWithTwo)), 1)[0];
+        secondBiggestCardWithTwo = Math.max(...cardsWithTwo);
+        kickerCards = cardSet.filter(card => card.number !== maxCardWithTwo && card.number !== secondBiggestCardWithTwo); 
+      }
+      kickerCards = cardSet.filter(card => card.number !== maxCardWithTwo);
+      for (let i=0; i<kickerCards.length; i++) {
+        kickers.push(kickerCards[i].number);
+      }
+      kickers.sort((a,b) => (b-a));
+      if (secondBiggestCardWithTwo) {
+        return { 2: [maxCardWithTwo, maxCardWithTwo, secondBiggestCardWithTwo, secondBiggestCardWithTwo, kickers[0]]};
+      }
+      return { 1: [maxCardWithTwo, maxCardWithTwo, kickers[0], kickers[1], kickers[2]]};
+    }
+    else {
+      return { 0: [cardSet[6].number, cardSet[5].number, cardSet[4].number, cardSet[3].number, cardSet[2].number]};
+    }
 
   }
 
@@ -395,11 +439,26 @@ const checkHand = (hand, board) => {
 
 let hands = makeHands(12, availableCards);
 console.log(hands);
-// let board = getBoard(availableCards);
-let board = [{number: 2, suit: 0}, {number: 3, suit: 0}, {number: 3, suit: 1},
-{number: 3, suit: 2}, {number:9, suit: 1}];
+let board = getBoard(availableCards);
 console.log(board);
 
+let handResults = [];
+let handWeights = [];
 for (let i = 0; i < hands.length; i++) {
-  (console.log(checkHand([{number: 3, suit: 3}, {number: 10, suit: 1}], board), hands[i].hand));
+  handResults.push(checkHand(hands[i].hand, board));
 }
+for (let i = 0; i < handResults.length; i++) {
+  handWeights.push(+Object.keys(handResults[i])[0]);
+}
+console.log(handResults);
+console.log(handWeights);
+let maxHand = Math.max(...handWeights);
+
+for (let i=0; i<handResults.length; i++) {
+  if (Object.keys(handResults[i])[0] === maxHand) {
+    console.log(handResults[i]);
+  }
+
+}
+
+console.log(handResults[handWeights.indexOf(Math.max(...handWeights))]);
